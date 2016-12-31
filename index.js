@@ -41,7 +41,6 @@ mPowerPlatform.prototype = {
 };
 
 function mPowerAccessory(log, airos_sessionid, outlet) {
-  // global vars
   this.log = log;
   this.airos_sessionid = airos_sessionid;
   
@@ -67,7 +66,6 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
   this.outletService
     .getCharacteristic(Characteristic.OutletInUse)
     .on('get', this.getOutletInUse.bind(this));
-  //  .setValue(this.state === 'on');
 
   this.services.push(this.outletService);
 }
@@ -75,6 +73,7 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
 mPowerAccessory.prototype.setState = function(state, callback) {
   var exec = require('child_process').exec;
   
+  //use expect to SSH to powerstrip to send on off commands directly on powerstrip
   var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
   
   var stateName = (state == 1) ? 'on' : 'off';
@@ -105,6 +104,7 @@ mPowerAccessory.prototype.setState = function(state, callback) {
 mPowerAccessory.prototype.getState = function(callback) {
   var exec = require('child_process').exec;
 
+  //use expect to SSH to powerstrip to get state directly from powerstrip
   var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
 
 
@@ -136,6 +136,7 @@ mPowerAccessory.prototype.getState = function(callback) {
 mPowerAccessory.prototype.getOutletInUse = function(callback) {
   var exec = require('child_process').exec;
 
+  //use expect to SSH to powerstrip to get in use state directly from power strip
   var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
   
       exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
