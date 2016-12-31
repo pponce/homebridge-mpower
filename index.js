@@ -84,7 +84,7 @@ mPowerAccessory.prototype.setState = function(state, callback) {
       exec(cmdUpdate, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-			var lines = stdout.toString().split('\n');
+	    var lines = stdout.toString().split('\n');
             var response = lines.splice(9,1);
 			for (var i = 0; i < response.length; i++){
 				response[i] = response[i].trim();
@@ -111,7 +111,7 @@ mPowerAccessory.prototype.getState = function(callback) {
       exec(cmdStatus, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-			var lines = stdout.toString().split('\n');
+	    var lines = stdout.toString().split('\n');
             var state = lines.splice(8,1);
 			for (var i = 0; i < state.length; i++){
 				state[i] = state[i].trim();
