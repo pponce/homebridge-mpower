@@ -164,39 +164,6 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
       });
 }
 
-mPowerAccessory.prototype.getOutletInUse = function(callback) {
-  var exec = require('child_process').exec;
-
-  var cmdAuth = 'curl -X POST -d "username=' + this.username + '&password=' + this.password + '" -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/login.cgi';
-  var cmdStatus = 'curl -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/sensors/' + this.id + '/power';
-
-  exec(cmdAuth, function(error, stdout, stderr) {
-    if (!error) {
-      exec(cmdStatus, function(error, stdout, stderr) {
-        if (!error) {
-          if (stdout != "") {
-            var state = JSON.parse(stdout);
-            if(state.sensors[0].power > 0) {
-              callback(null, true);
-            } else if(state.sensors[0].power == 0) {
-              callback(null, false);
-            }
-			else {
-              callback(error);
-            }
-          } else {
-            console.log("Failed to communicate with mPower accessory");
-          }
-        } else {
-          console.log("Failed with error: " + error);
-        }
-      });
-    } else {
-      console.log("Failed with error: " + error);
-    }
-  });
-}
-
 mPowerAccessory.prototype.getDefaultValue = function(callback) {
   callback(null, this.value);
 }
