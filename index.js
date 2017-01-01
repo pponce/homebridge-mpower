@@ -43,11 +43,8 @@ mPowerPlatform.prototype = {
 function mPowerAccessory(log, airos_sessionid, outlet) {
   this.log = log;
   this.airos_sessionid = airos_sessionid;
-<<<<<<< HEAD
   
   // configuration vars
-=======
->>>>>>> refs/remotes/wr/master
   this.name = outlet["name"];
   this.username = outlet["username"];
   this.password = outlet["password"];
