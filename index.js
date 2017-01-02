@@ -50,8 +50,7 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
   this.password = outlet["password"];
   this.url = outlet["url"];
   this.id = outlet["id"];
- 
-
+  
   // register the service and provide the functions
   this.services = [];
   this.outletService = new Service.Outlet(this.name);
@@ -72,11 +71,12 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
 
 mPowerAccessory.prototype.setState = function(state, callback) {
   var exec = require('child_process').exec;
-  
+  state = (state == true) ? 1 : 0;
+  var stateName = (state == 1) ? 'on' : 'off';
   //use expect to SSH to powerstrip to send on off commands directly on powerstrip
   var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
-  
-  var stateName = (state == 1) ? 'on' : 'off';
+  //this.log("state variable = " + state + ".");
+
 
   this.log("Turning " + this.name + " outlet " + stateName + ".");
 
@@ -88,7 +88,7 @@ mPowerAccessory.prototype.setState = function(state, callback) {
 			for (var i = 0; i < response.length; i++){
 				response[i] = response[i].trim();
 			}
-	    this.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
+	   //console.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
             if(response[0] == state) {
               callback(null);
             } else {
@@ -116,7 +116,7 @@ mPowerAccessory.prototype.getState = function(callback) {
 			for (var i = 0; i < state.length; i++){
 				state[i] = state[i].trim();
 			}
-	    this.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
+	    //console.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
             if(state[0] == 1) {
               callback(null, true);
             } else if(state[0] == 0) {
@@ -148,7 +148,7 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
 			for (var i = 0; i < inUseState.length; i++){
 				inUseState[i] = inUseState[i].trim();
 			}
-	    this.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
+	    //console.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
             if(inUseState[0] != "0.0") {
               callback(null, true);
             } else if(inUseState[0] == "0.0") {
