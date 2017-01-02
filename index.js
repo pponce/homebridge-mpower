@@ -88,7 +88,7 @@ mPowerAccessory.prototype.setState = function(state, callback) {
 			for (var i = 0; i < response.length; i++){
 				response[i] = response[i].trim();
 			}
-
+	    this.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
             if(response[0] == state) {
               callback(null);
             } else {
@@ -116,6 +116,7 @@ mPowerAccessory.prototype.getState = function(callback) {
 			for (var i = 0; i < state.length; i++){
 				state[i] = state[i].trim();
 			}
+	    this.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
             if(state[0] == 1) {
               callback(null, true);
             } else if(state[0] == 0) {
@@ -147,12 +148,13 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
 			for (var i = 0; i < inUseState.length; i++){
 				inUseState[i] = inUseState[i].trim();
 			}
+	    this.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
             if(inUseState[0] != "0.0") {
               callback(null, true);
             } else if(inUseState[0] == "0.0") {
               callback(null, false);
             }
-			else {
+	    else {
               callback(error);
             }
           } else {
