@@ -71,7 +71,7 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
 
 mPowerAccessory.prototype.setState = function(state, callback) {
   var exec = require('child_process').exec;
-  state = (state == true) ? 1 : 0;
+  state = (state == true || state == 1) ? 1 : 0;
   var stateName = (state == 1) ? 'on' : 'off';
   //use expect to SSH to powerstrip to send on off commands directly on powerstrip
   var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
