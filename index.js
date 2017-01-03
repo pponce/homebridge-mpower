@@ -73,25 +73,22 @@ mPowerAccessory.prototype.setState = function(state, callback) {
   var exec = require('child_process').exec;
   state = (state == true || state == 1) ? 1 : 0;
 
-  //use expect to SSH to powerstrip to send on off commands directly on powerstrip
+  //use SSH to powerstrip to send on off commands directly to powerstrip
   //var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
-  var cmdUpdate = 'ssh ubnt@' + this.url + ' "echo ' + state + ' > /proc/power/relay' + this.id + '"';
-  this.log("state variable = " + state + ".");
+  var cmdUpdate = 'echo $(ssh ubnt@' + this.url + ' "echo ' + state + ' > /proc/power/relay' + this.id + ';cd /proc/power;grep \'\' relay' + this.id + '*;exit;")';
+  //this.log("state variable = " + state + ".");
   var stateName = (state == 1) ? 'on' : 'off';
 
   this.log("Turning " + this.name + " outlet " + stateName + ".");
-
+  
       exec(cmdUpdate, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-	    var response = stdout.toString().split('\n');
-	    for (var i = 0; i < response.length; i++){
-		response[i] = response[i].trim();
-	    }
-	   console.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
-            if(response[0] == state) {
-              callback(null);
-            } else {
+	      var response = stdout.trim();
+	      //console.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
+              if(response == state) {
+                callback(null);
+              } else {
               callback(error);
             }
           } else {
@@ -105,21 +102,17 @@ mPowerAccessory.prototype.getState = function(callback) {
   var exec = require('child_process').exec;
 
   //use expect to SSH to powerstrip to get state directly from powerstrip
-  var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
-
+  //var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdStatus = 'echo $(ssh ubnt@' + this.url + ' "cd /proc/power;grep \'\' relay' + this.id + '*;exit;")';
 
       exec(cmdStatus, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-	    var lines = stdout.toString().split('\n');
-            var state = lines.splice(8,1);
-			for (var i = 0; i < state.length; i++){
-				state[i] = state[i].trim();
-			}
-	    console.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
-            if(state[0] == 1) {
+            var state = stdout.trim();
+	    //console.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
+            if(state == 1) {
               callback(null, true);
-            } else if(state[0] == 0) {
+            } else if(state == 0) {
               callback(null, false);
             }
             else {
@@ -138,20 +131,17 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
   var exec = require('child_process').exec;
 
   //use expect to SSH to powerstrip to get in use state directly from power strip
-  var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
-  
-      exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
+  //var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdOutletInUseStatus = 'echo $(ssh ubnt@' + this.url + ' "cd /proc/power;grep \'\' active_pwr' + this.id + '*;exit;")';
+      
+	  exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-            var lines = stdout.toString().split('\n');
-            var inUseState = lines.splice(8,1);
-			for (var i = 0; i < inUseState.length; i++){
-				inUseState[i] = inUseState[i].trim();
-			}
-	    console.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
-            if(inUseState[0] != "0.0") {
+            var inUseState = stdout.trim();
+	    //console.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
+            if(inUseState != "0.0") {
               callback(null, true);
-            } else if(inUseState[0] == "0.0") {
+            } else if(inUseState == "0.0") {
               callback(null, false);
             }
 	    else {
