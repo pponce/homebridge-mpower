@@ -74,7 +74,7 @@ mPowerAccessory.prototype.setState = function(state, callback) {
   state = (state == true || state == 1) ? 1 : 0;
   var stateName = (state == 1) ? 'on' : 'off';
   //use expect to SSH to powerstrip to send on off commands directly on powerstrip
-  var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"';
   //this.log("state variable = " + state + ".");
 
 
@@ -105,7 +105,7 @@ mPowerAccessory.prototype.getState = function(callback) {
   var exec = require('child_process').exec;
 
   //use expect to SSH to powerstrip to get state directly from powerstrip
-  var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"';
 
 
       exec(cmdStatus, function(error, stdout, stderr) {
@@ -138,7 +138,7 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
   var exec = require('child_process').exec;
 
   //use expect to SSH to powerstrip to get in use state directly from power strip
-  var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"';
   
       exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
         if (!error) {
