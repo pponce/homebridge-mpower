@@ -72,23 +72,23 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
 mPowerAccessory.prototype.setState = function(state, callback) {
   var exec = require('child_process').exec;
   state = (state == true || state == 1) ? 1 : 0;
-  var stateName = (state == 1) ? 'on' : 'off';
-  //use expect to SSH to powerstrip to send on off commands directly on powerstrip
-  var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
-  //this.log("state variable = " + state + ".");
 
+  //use expect to SSH to powerstrip to send on off commands directly on powerstrip
+  //var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdUpdate = 'ssh ubnt@' + this.url + ' "echo ' + state + ' > /proc/power/relay' + this.id + '"';
+  this.log("state variable = " + state + ".");
+  var stateName = (state == 1) ? 'on' : 'off';
 
   this.log("Turning " + this.name + " outlet " + stateName + ".");
 
       exec(cmdUpdate, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-	    var lines = stdout.toString().split('\n');
-            var response = lines.splice(9,1);
-			for (var i = 0; i < response.length; i++){
-				response[i] = response[i].trim();
-			}
-	   //console.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
+	    var response = stdout.toString().split('\n');
+	    for (var i = 0; i < response.length; i++){
+		response[i] = response[i].trim();
+	    }
+	   console.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
             if(response[0] == state) {
               callback(null);
             } else {
@@ -116,7 +116,7 @@ mPowerAccessory.prototype.getState = function(callback) {
 			for (var i = 0; i < state.length; i++){
 				state[i] = state[i].trim();
 			}
-	    //console.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
+	    console.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
             if(state[0] == 1) {
               callback(null, true);
             } else if(state[0] == 0) {
@@ -148,7 +148,7 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
 			for (var i = 0; i < inUseState.length; i++){
 				inUseState[i] = inUseState[i].trim();
 			}
-	    //console.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
+	    console.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
             if(inUseState[0] != "0.0") {
               callback(null, true);
             } else if(inUseState[0] == "0.0") {
