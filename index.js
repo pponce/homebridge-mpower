@@ -43,16 +43,19 @@ mPowerPlatform.prototype = {
 function mPowerAccessory(log, airos_sessionid, outlet) {
   this.log = log;
   this.airos_sessionid = airos_sessionid;
+  
+  // configuration vars
   this.name = outlet["name"];
   this.username = outlet["username"];
   this.password = outlet["password"];
   this.url = outlet["url"];
   this.id = outlet["id"];
-
+  
+  // register the service and provide the functions
   this.services = [];
-
   this.outletService = new Service.Outlet(this.name);
-
+  
+  // the current state (on / off)
   this.outletService
     .getCharacteristic(Characteristic.On)
     .on('get', this.getState.bind(this))
@@ -69,24 +72,23 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
 mPowerAccessory.prototype.setState = function(state, callback) {
   var exec = require('child_process').exec;
   state = (state == true || state == 1) ? 1 : 0;
-  
-  var cmdAuth = 'curl -X POST -d "username=' + this.username + '&password=' + this.password + '" -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/login.cgi';
-  var cmdUpdate = 'curl -X POST -d "output=' + state+ '" -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/sensors/' + this.id;
 
+  //use SSH to powerstrip to send on off commands directly to powerstrip
+  //var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdUpdate = 'echo $(ssh ubnt@' + this.url + ' "echo ' + state + ' > /proc/power/relay' + this.id + ';cd /proc/power;grep \'\' relay' + this.id + '*;exit;")';
+  //this.log("state variable = " + state + ".");
   var stateName = (state == 1) ? 'on' : 'off';
 
   this.log("Turning " + this.name + " outlet " + stateName + ".");
-
-  exec(cmdAuth, function(error, stdout, stderr) {
-    if (!error) {
+  
       exec(cmdUpdate, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-            var response = JSON.parse(stdout);
-
-            if(response.status == "success") {
-              callback(null);
-            } else {
+	      var response = stdout.trim();
+	      //console.log("set " + this.name + " outlet to " + state + " and checked OnOff state for " + this.name + " outlet is " + response[0] + ".");
+              if(response == state) {
+                callback(null);
+              } else {
               callback(error);
             }
           } else {
@@ -94,27 +96,23 @@ mPowerAccessory.prototype.setState = function(state, callback) {
           }
         }
       });
-    } else {
-      console.log("Failed with error: " + error);
-    }
-  });
 }
 
 mPowerAccessory.prototype.getState = function(callback) {
   var exec = require('child_process').exec;
 
-  var cmdAuth = 'curl -X POST -d "username=' + this.username + '&password=' + this.password + '" -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/login.cgi';
-  var cmdStatus = 'curl -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/sensors/' + this.id + '/output';
+  //use expect to SSH to powerstrip to get state directly from powerstrip
+  //var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdStatus = 'echo $(ssh ubnt@' + this.url + ' "cd /proc/power;grep \'\' relay' + this.id + '*;exit;")';
 
-  exec(cmdAuth, function(error, stdout, stderr) {
-    if (!error) {
       exec(cmdStatus, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-            var state = JSON.parse(stdout);
-            if(state.sensors[0].output == 1) {
+            var state = stdout.trim();
+	    //console.log("OnOff state for " + this.name + " outlet is " + state[0] + ".");
+            if(state == 1) {
               callback(null, true);
-            } else if(state.sensors[0].output == 0) {
+            } else if(state == 0) {
               callback(null, false);
             }
             else {
@@ -127,27 +125,23 @@ mPowerAccessory.prototype.getState = function(callback) {
           console.log("Failed with error: " + error);
         }
       });
-    } else {
-      console.log("Failed with error: " + error);
-    }
-  });
 }
 
 mPowerAccessory.prototype.getOutletInUse = function(callback) {
   var exec = require('child_process').exec;
 
-  var cmdAuth = 'curl -X POST -d "username=' + this.username + '&password=' + this.password + '" -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/login.cgi';
-  var cmdOutletInUseStatus = 'curl -b "AIROS_SESSIONID=' + this.airos_sessionid + '" ' + this.url + '/sensors/' + this.id + '/power';
-
-  exec(cmdAuth, function(error, stdout, stderr) {
-    if (!error) {
-      exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
+  //use expect to SSH to powerstrip to get in use state directly from power strip
+  //var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  var cmdOutletInUseStatus = 'echo $(ssh ubnt@' + this.url + ' "cd /proc/power;grep \'\' active_pwr' + this.id + '*;exit;")';
+      
+	  exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
         if (!error) {
           if (stdout != "") {
-            var state = JSON.parse(stdout);
-            if(state.sensors[0].power > 0) {
+            var inUseState = stdout.trim();
+	    //console.log("inUseState value for " + this.name + " outlet is " + inUseState[0] + ".");
+            if(inUseState != "0.0") {
               callback(null, true);
-            } else if(state.sensors[0].power == 0) {
+            } else if(inUseState == "0.0") {
               callback(null, false);
             }
 	    else {
@@ -160,10 +154,6 @@ mPowerAccessory.prototype.getOutletInUse = function(callback) {
           console.log("Failed with error: " + error);
         }
       });
-    } else {
-      console.log("Failed with error: " + error);
-    }
-  });
 }
 
 mPowerAccessory.prototype.getDefaultValue = function(callback) {
