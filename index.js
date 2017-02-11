@@ -74,7 +74,6 @@ mPowerAccessory.prototype.setState = function(state, callback) {
   state = (state == true || state == 1) ? 1 : 0;
 
   //use SSH to powerstrip to send on off commands directly to powerstrip
-  //var cmdUpdate = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"password: \\"; send \\"' + this.password + '\\"; send \\"\\r\\"; expect \\"#\\"; send \\"echo ' + state + ' > /proc/power/relay' + this.id + '\\r\\"; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
   var cmdUpdate = 'echo $(ssh ubnt@' + this.url + ' "echo ' + state + ' > /proc/power/relay' + this.id + ';cd /proc/power;grep \'\' relay' + this.id + '*;exit;")';
   //this.log("state variable = " + state + ".");
   var stateName = (state == 1) ? 'on' : 'off';
@@ -101,8 +100,7 @@ mPowerAccessory.prototype.setState = function(state, callback) {
 mPowerAccessory.prototype.getState = function(callback) {
   var exec = require('child_process').exec;
 
-  //use expect to SSH to powerstrip to get state directly from powerstrip
-  //var cmdStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"#\\"; send \\"cd /proc/power;grep \'\' relay' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+  //use SSH to powerstrip to send on off commands directly to powerstrip
   var cmdStatus = 'echo $(ssh ubnt@' + this.url + ' "cd /proc/power;grep \'\' relay' + this.id + '*;exit;")';
 
       exec(cmdStatus, function(error, stdout, stderr) {
@@ -130,8 +128,7 @@ mPowerAccessory.prototype.getState = function(callback) {
 mPowerAccessory.prototype.getOutletInUse = function(callback) {
   var exec = require('child_process').exec;
 
-  //use expect to SSH to powerstrip to get in use state directly from power strip
-  //var cmdOutletInUseStatus = 'expect -c "set timeout 5; spawn ssh -oStrictHostKeyChecking=no ' + this.url + ' -l ' + this.username + '; expect \\"#\\"; send \\"cd /proc/power;grep \'\' active_pwr' + this.id + '* \\r\\"; expect \\"#\\"; send \\"exit\\r\\";"'
+ //use SSH to powerstrip to send on off commands directly to powerstrip
   var cmdOutletInUseStatus = 'echo $(ssh ubnt@' + this.url + ' "cd /proc/power;grep \'\' active_pwr' + this.id + '*;exit;")';
       
 	  exec(cmdOutletInUseStatus, function(error, stdout, stderr) {
