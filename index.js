@@ -47,7 +47,7 @@ function mPowerAccessory(log, airos_sessionid, outlet) {
   // configuration vars
   this.name = outlet["name"];
   this.username = outlet["username"];
-  this.password = outlet["password"];
+  //this.password = outlet["password"];
   this.url = outlet["url"];
   this.id = outlet["id"];
   
