@@ -1,5 +1,6 @@
 # homebridge-mpower
 This is a plugin for [homebridge](https://github.com/nfarina/homebridge). It allows you to control your Ubiquiti mPower outlets with HomeKit.
+
 This version of the plugin uses SSH to execute the commands on the mPower device. It requires some special setup to allow being able to SSH without the need for password. Instructions below on how to generate the SSH key needed to do this and where to place it on the mPower device.
 
 # Installation
