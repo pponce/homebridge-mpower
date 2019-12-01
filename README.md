@@ -36,7 +36,7 @@ Hit 'control d' a couple of times
   
 5.) From the homebridge device ssh one time to the mPower pro to permantly add the ip address of the homebridge device to the list of known hosts. Run the ssh command as the same user that runs homebridge. Replace mPower username and Ip below as well.
 
-sudo -u homebridge ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 username_of_mPower_device@ip_of_mPower_device
+sudo -u homebridge ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 username@ip_of_mPower_device
 
 respond yes when prompted.
   
