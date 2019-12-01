@@ -10,6 +10,7 @@ This version of the plugin uses SSH to execute the commands on the mPower device
 4. You will need to create an ssh key and install it on the mPower device to automate ssh login from homebridge device without the need for a password. Instructions below.
 
 Creating SSH key for mPower device:
+
 1.) You will need run the command below on your homebridge device. I'm running it on a raspberry device and i run homebridge with user "homebridge".  Replace the username below (homebridge) with the username you use to run homebridge.
 
 sudo -u homebridge ssh-keygen –t rsa <return>
