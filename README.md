@@ -15,6 +15,7 @@ Creating SSH key for mPower device:
 1.) You will need run the command below on your homebridge device. I'm running it on a raspberry device and i run homebridge with user "homebridge".  Replace the username below (homebridge) with the username you use to run homebridge.
 
 sudo -u homebridge ssh-keygen –t rsa
+
 Hit 3 times return
 
 2.) Private and public keys are created in my case under  /home/homebridge/.ssh/. Navigate to this directory. It may be under a different user folder in your case based on what user you use to run homebridge. copy the contents of id_rsa.pub by running the following command.
@@ -28,12 +29,15 @@ If the directory's don't exist create them.
 Here is one way to do it
 
 cat > authorized_keys
+
 paste contents
+
 Hit 'control d' a couple of times
   
 5.) From the homebridge device ssh one time to the mPower pro to permantly add the ip address of the homebridge device to the list of known hosts. Run the ssh command as the same user that runs homebridge. Replace mPower username and Ip below as well.
 
 sudo -u homebridge ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 username_of_mPower_device@ip_of_mPower_device
+
 respond yes when prompted.
   
 6.) you should be all set now.
