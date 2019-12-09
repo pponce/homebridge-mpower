@@ -30,7 +30,7 @@ Here is one way to do it
 
 cat > authorized_keys
 
-paste contents
+paste contents from step 2
 
 Hit 'control d' a couple of times
   
@@ -40,7 +40,7 @@ sudo -u homebridge ssh -oKexAlgorithms=+diffie-hellman-group1-sha1 username@ip_o
 
 respond yes when prompted.
   
-6.) you should be all set now.
+6.) you should be all set now. Repeat steps 3,4,5 for other mPower strips.
 
 # Configuration
 
